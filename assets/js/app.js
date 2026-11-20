@@ -323,6 +323,7 @@
     if (hash.startsWith('#/contests')) bindContests();
     if (hash.startsWith('#/me')) bindMe();
     bindRail();
+    bindLogo3D();
     $$('[data-present]').forEach((b) => b.addEventListener('click', () => Deck.open(Store.get(b.dataset.present))));
     $$('[data-club-deck]').forEach((b) => b.addEventListener('click', () => Deck.show(buildClubSlides())));
     $$('[data-login]').forEach((b) => b.addEventListener('click', () => $('#authBtn').click()));
@@ -360,68 +361,52 @@
 
   /* ---------------- view: home ---------------- */
   function viewHome() {
-    const acts = Store.activities;
-    const done = acts.filter((a) => a.status === '완료').length;
-    const ext = acts.filter((a) => ['외부대회', '연계사업'].includes(a.category)).length;
-    const feat = Store.get('startupcycling-2026-coffeeshield') || acts.find((a) => a.status === '완료');
-    const kws = [...new Set(acts.flatMap((a) => a.keywords || []))];
-    const kwRow = kws.map((k) => `<span class="chip">${esc(k)}</span>`).join('');
-    const openContests = SEED.contests.filter((c) => ['open', 'soon'].includes(contestStatus(c).kind)).length;
+    const C = SEED.club;
     const locked = Store.mode === 'supabase' && !Store.isMember();
+    const openContests = SEED.contests.filter((c) => ['open', 'soon'].includes(contestStatus(c).kind)).length;
+    const awardCount = (C.awards || []).filter((g) => /^\d{4}$/.test(g.year)).reduce((n, g) => n + g.items.length, 0);
+    const kwRow = (C.keywords || []).map((k) => `<span class="chip">${esc(k)}</span>`).join('');
     const chap = (n, title) => `<div class="chapter reveal" aria-hidden="true"><span class="ch-no">${n}</span><span class="ch-line"></span><span class="ch-title">${esc(title)}</span></div>`;
 
     return `
     <nav class="rail" aria-label="챕터 이동">
-      ${[['00', '표지'], ['01', '부서'], ['02', '대표 기록'], ['03', '성장 기록'], ['04', '함께 쓰기']].map(([n, t]) => `<button type="button" data-rail="ch-${n}" title="${t}"><i></i><span>${n} ${t}</span></button>`).join('')}
+      ${[['00', '표지'], ['01', '부서'], ['02', '특별한 이유'], ['03', '결과로 보여줌'], ['04', '함께 쓰기']].map(([n, t]) => `<button type="button" data-rail="ch-${n}" title="${t}"><i></i><span>${n} ${t}</span></button>`).join('')}
     </nav>
 
     <section class="hero wrap" id="ch-00" data-chapter>
       <div class="hero-grid">
         <div>
-          <span class="eyebrow reveal"><i></i>대전대신고 환경·생태 동아리 · ${esc(SEED.club.year)}</span>
-          <h1 class="reveal">자라나는 기록,<br><span class="hl">함께 쌓는 숲</span> <span class="serif">nalssam.</span></h1>
-          <p class="hero-lead reveal">날샘의 활동 보고서, 외부 대회 경험, 학습지와 사진을 한곳에 모았어요. 한 해의 기록이 다음 기수의 출발점이 됩니다.</p>
+          <span class="eyebrow reveal"><i></i>${esc(C.school)} · ${esc(C.identity)}</span>
+          <h1 class="reveal">자라나는 기록,<br><span class="hl">함께 쌓는 숲</span> <span class="serif caps">NALSSAM.</span></h1>
+          <p class="hero-lead reveal">${esc(C.lead)}</p>
           <div class="hero-cta reveal">
             <a class="btn btn-primary" href="#/archive">활동 기록 보기 <span class="arr">→</span></a>
             <button class="btn btn-ghost" type="button" data-club-deck>▶ 날샘 소개 발표</button>
           </div>
           <div class="hero-stats reveal">
-            <a class="stat" href="#/archive"><b>${acts.length}</b><span>아카이브 기록</span></a>
+            <div class="stat"><b>3</b><span>공학 · 생명 · 화학부</span></div>
+            <div class="stat"><b>${awardCount}</b><span>수상 · 선정 (2020–2022)</span></div>
             <a class="stat" href="#/contests"><b>${SEED.contests.length}</b><span>대회 정보${openContests ? ` · ${openContests}곳 곧 열림` : ''}</span></a>
-            <a class="stat" href="#/report"><b>5</b><span>보고서 양식 형식</span></a>
           </div>
         </div>
-        <div class="hero-visual reveal" aria-hidden="true">
-          <div class="blob"></div>
-          <div class="sheet">
-            <div class="sheet-top"><span class="sheet-num">1</span><span class="sheet-title">폐자원 분석</span></div>
-            <div class="sheet-lines"><i></i><i></i><i></i></div>
-            <div class="sheet-meta"><span class="chip tone-lime">🏆 외부대회</span><span class="chip tone-mint">업사이클링</span></div>
-          </div>
-          <div class="sheet">
-            <div class="sheet-top"><span class="sheet-num">5</span><span class="sheet-title">결과</span></div>
-            <div class="sheet-big">100<small style="font-size:18px">g</small></div>
-            <div class="muted" style="font-size:13px">타일 1장에 들어간 커피박</div>
-          </div>
-          <div class="sheet">
-            <div class="sheet-top"><span class="sheet-num">4</span><span class="sheet-title">진행 과정</span></div>
-            <div class="sheet-lines"><i></i><i></i><i></i></div>
-            <div class="sheet-meta"><span class="chip status-완료">완료</span><span class="chip">자료 9</span></div>
-          </div>
+        <div class="hero-visual reveal" aria-hidden="false">
+          <div class="halo" aria-hidden="true"></div>
+          ${window.nalssamLogo3D ? window.nalssamLogo3D(16) : ''}
+          <p class="logo-caption" aria-hidden="true">${esc(C.slogan)}</p>
         </div>
       </div>
     </section>
 
-    <div class="marquee" aria-label="올해의 키워드"><div class="marquee-track">${kwRow}${kwRow}</div></div>
+    <div class="marquee" aria-label="날샘 키워드"><div class="marquee-track">${kwRow}${kwRow}</div></div>
 
     <section class="wrap" id="ch-01" data-chapter>
       ${chap('01', 'Departments')}
       <div class="sec-head">
         <div><span class="eyebrow reveal"><i></i>세 개의 부서</span><h2 class="reveal">하나의 숲, 세 갈래의 뿌리</h2></div>
-        <p class="reveal">기계와 생명과 물질. 서로 다른 시선으로 같은 환경 문제를 들여다봐요.</p>
+        <p class="reveal">날샘은 원래 공학 동아리에서 시작했어요. 지금은 생명부 · 화학부와 함께 자연과학과 공학을 잇는 융합 동아리예요.</p>
       </div>
       <div class="dept-grid">
-        ${SEED.club.departments.map((d) => `
+        ${C.departments.map((d) => `
           <div class="dept tone-${d.tone} reveal">
             <span class="dept-orb"></span>
             <h3>${esc(d.key)}</h3><span class="en">${esc(d.en)}</span>
@@ -430,48 +415,38 @@
       </div>
     </section>
 
-    ${feat ? `
     <section class="wrap" id="ch-02" data-chapter>
-      ${chap('02', 'Featured')}
-      <div class="feature reveal">
-        <div class="feature-copy">
-          <span class="chip">${esc(feat.category)} · 보고서 예시</span>
-          <h3>${esc(feat.subtitle || feat.title)}</h3>
-          <p>${esc(feat.tagline || feat.summary)}</p>
-          <div style="display:flex;flex-wrap:wrap;gap:6px">${(feat.keywords || []).slice(0, 4).map((k) => `<span class="chip">#${esc(k)}</span>`).join('')}</div>
-          <div class="hero-cta" style="margin-top:8px">
-            <a class="btn btn-lime" href="#/a/${encodeURIComponent(feat.id)}">기록 열기 <span class="arr">→</span></a>
-            <button class="btn btn-ghost" style="color:#E3F3C8;border-color:rgba(255,255,255,.25)" type="button" data-present="${esc(feat.id)}">▶ 발표 모드</button>
-          </div>
-        </div>
-        <div class="feature-art" aria-hidden="true">
-          <div class="tile"></div><span class="flame">🔥</span>
-          <span class="tile-label">coffee shield.</span>
-        </div>
+      ${chap('02', 'Why NALSSAM')}
+      <div class="sec-head">
+        <div><span class="eyebrow reveal"><i></i>날샘이 특별한 이유</span><h2 class="reveal">원하는 탐구를, 끝까지 지원해요</h2></div>
+        <p class="reveal">어떤 활동이든, 무엇을 원하든 — 자연과학이면 어느 진로든 함께 준비해요.</p>
       </div>
-    </section>` : `
-    <section class="wrap" id="ch-02" data-chapter>
-      ${chap('02', 'Featured')}
-      <div class="locked reveal">
-        <span class="locked-ic">🌿</span>
-        <div><h3>대표 기록은 부원에게 먼저 열려요</h3><p>팀 보고서에는 친구들 이름과 학습지가 들어 있어서, 작성자가 공개 범위를 정해요. 학교 메일로 로그인하면 부원 공개 기록이 보여요.</p></div>
-        ${locked ? `<button class="btn btn-primary" type="button" data-login>부원 로그인</button>` : ''}
+      <div class="why-grid">
+        ${(C.highlights || []).map((h, i) => `
+          <article class="why reveal">
+            <span class="why-n">${String(i + 1).padStart(2, '0')}</span>
+            <span class="why-ic" aria-hidden="true">${h.icon}</span>
+            ${h.big ? `<b class="why-big">${esc(h.big)}</b>` : ''}
+            <h3>${esc(h.title)}</h3>
+            <p>${esc(h.desc)}</p>
+          </article>`).join('')}
       </div>
-    </section>`}
+    </section>
 
     <section class="wrap" id="ch-03" data-chapter>
-      ${chap('03', 'Growth Log')}
+      ${chap('03', 'Proven by Results')}
       <div class="sec-head">
-        <div><span class="eyebrow reveal"><i></i>${esc(SEED.club.year)} 성장 기록</span><h2 class="reveal">한 해 동안 뻗어 나간 줄기</h2></div>
-        <a class="btn btn-soft reveal" href="#/archive">전체 보기 <span class="arr">→</span></a>
+        <div><span class="eyebrow reveal"><i></i>우린 결과로 보여줘요</span><h2 class="reveal">선배들이 쌓아온 수상 · 활동</h2></div>
+        <a class="btn btn-soft reveal" href="#/contests">대회 아카이브 <span class="arr">→</span></a>
       </div>
-      <div class="vine">
-        ${acts.length ? acts.map((a) => `
-          <a class="vine-item reveal ${a.status === '기록대기' ? 'wait' : ''}" href="#/a/${encodeURIComponent(a.id)}">
-            <div><h4>${esc(a.title)}</h4><p>${esc(a.subtitle || a.summary)}</p></div>
-            <div class="vine-meta">${catChip(a.category)}${statusChip(a.status)}</div>
-          </a>`).join('') : `<div class="vine-item wait reveal"><div><h4>아직 볼 수 있는 기록이 없어요</h4><p>${locked ? '부원 공개 기록은 로그인 후에 보여요.' : '[보고서 양식]에서 첫 기록을 남겨보세요.'}</p></div></div>`}
+      <div class="awards">
+        ${(C.awards || []).map((g) => `
+          <div class="award-year reveal">
+            <div class="ay-head"><b>${esc(g.year)}</b><span>${g.items.length}</span></div>
+            <ul>${g.items.map((it) => `<li><span class="ay-dot" aria-hidden="true"></span>${esc(it)}</li>`).join('')}</ul>
+          </div>`).join('')}
       </div>
+      <p class="muted source-note reveal">출처: 대전대신고등학교 공식 유튜브 「2026 날샘 동아리 홍보영상」</p>
     </section>
 
     <section class="wrap" id="ch-04" data-chapter>
@@ -484,14 +459,32 @@
         <div class="join-steps">
           <div><b>1</b><span>학교 메일로 로그인</span></div>
           <div><b>2</b><span>[내 기록]에서 프로필 · 개인 보고서 작성</span></div>
-          <div><b>3</b><span>[보고서 양식]으로 팀 기록 남기기</span></div>
+          <div><b>3</b><span>[보고서 양식]을 내려받아 팀 보고서 쓰기</span></div>
         </div>
         <div class="hero-cta">
           ${Store.mode === 'supabase' && !Store.user ? `<button class="btn btn-primary" type="button" data-login>로그인하기</button>` : `<a class="btn btn-primary" href="#/me">내 기록으로 <span class="arr">→</span></a>`}
           <a class="btn btn-ghost" href="#/report">보고서 양식 열기</a>
+          ${locked ? '' : ''}
         </div>
       </div>
     </section>`;
+  }
+
+  // 입체 로고: 마우스를 따라 살짝 기울기 (터치 기기와 '동작 줄이기' 설정에서는 자동 흔들림만)
+  function bindLogo3D() {
+    const box = $('.logo3d');
+    if (!box || !window.matchMedia('(hover: hover)').matches || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const rig = $('.logo3d-rig', box);
+    const area = box.closest('.hero') || box;
+    area.addEventListener('pointermove', (e) => {
+      const r = box.getBoundingClientRect();
+      const x = (e.clientX - (r.left + r.width / 2)) / r.width;
+      const y = (e.clientY - (r.top + r.height / 2)) / r.height;
+      rig.style.setProperty('--ry', `${Math.max(-1, Math.min(1, x)) * 28}deg`);
+      rig.style.setProperty('--rx', `${Math.max(-1, Math.min(1, y)) * -16}deg`);
+      box.classList.add('tracking');
+    });
+    area.addEventListener('pointerleave', () => box.classList.remove('tracking'));
   }
 
   /* 홈 챕터 레일: 지금 보고 있는 챕터 표시 */
@@ -802,7 +795,7 @@
           </dl>
           ${c.note ? `<p class="c-note">${esc(c.note)}</p>` : ''}
           <div class="c-tags">${(c.field || []).map((f) => `<span>${esc(f)}</span>`).join('')}</div>
-          ${c.history?.length ? `<div class="c-hist">${c.history.map((h) => `<a href="#/a/${encodeURIComponent(h.activity)}">🌿 ${esc(h.year)} · ${esc(h.result)} →</a>`).join('')}</div>` : ''}
+          ${c.history?.length ? `<div class="c-hist">${c.history.map((h) => (h.activity ? `<a href="#/a/${encodeURIComponent(h.activity)}">🌿 ${esc(h.year)} · ${esc(h.result)} →</a>` : `<span>🏅 ${esc(h.year)} · ${esc(h.result)}</span>`)).join('')}</div>` : ''}
           ${c.tips?.length ? `<details class="c-tips"><summary>선배 노하우 ${c.tips.length}개</summary><ul>${c.tips.map((t) => `<li>${esc(t)}</li>`).join('')}</ul></details>` : ''}
         </div>
         <div class="c-apply">
@@ -1515,42 +1508,61 @@
     </article>`;
   }
 
-  /* ---------------- 날샘 소개 발표 (동아리 전체 덱) ---------------- */
+  /* ---------------- 날샘 소개 발표 (동아리 전체 덱 · 개인 기록은 넣지 않음) ---------------- */
   function buildClubSlides() {
-    const acts = Store.activities;
-    const foot = `<div class="s-foot"><span>날샘 · 대전대신고등학교 환경·생태 동아리</span><span>${esc(SEED.club.year)}</span></div>`;
-    const ext = acts.filter((a) => ['외부대회', '연계사업'].includes(a.category)).length;
-    const feat = Store.get('startupcycling-2026-coffeeshield');
+    const C = SEED.club;
+    const foot = `<div class="s-foot"><span>날샘 NALSSAM · ${esc(C.school)}</span><span>${esc(C.year)}</span></div>`;
+    const logo = (h) => `<div class="s-logo" style="height:${h}px">${window.nalssamLogo ? window.nalssamLogo('flat') : ''}</div>`;
     const S = [];
+    // 1. 표지
     S.push(`<section class="slide lime"><span class="s-blob"></span>
-      <div class="s-kicker" style="color:#1F6B2C">대전대신고등학교 · 환경 · 생태</div>
-      <h1 class="s-title" style="font-size:160px">날샘<span style="font-family:var(--serif);font-style:italic;font-weight:400;font-size:.55em;color:#2F8A3B"> nalssam.</span></h1>
-      <div class="s-sub" style="color:#17502A">자라나는 기록, 함께 쌓는 숲</div>
-      <div class="s-chips">${SEED.club.departments.map((d) => `<span>${esc(d.key)} · ${esc(d.en)}</span>`).join('')}</div>${foot}</section>`);
-    S.push(`<section class="slide"><div class="s-kicker"><span class="n">1</span>세 갈래의 뿌리</div>
-      <h2 class="s-h">기계와 생명과 물질로<br>같은 환경 문제를 봐요</h2>
-      <div class="s-flow">${SEED.club.departments.map((d, i) => `<div><em>0${i + 1}</em><b>${esc(d.key)}</b><p>${esc(d.desc)}</p></div>`).join('')}</div>${foot}</section>`);
-    S.push(`<section class="slide dark"><span class="s-blob"></span><div class="s-kicker"><span class="n">2</span>${esc(SEED.club.year)}, 숫자로 보기</div>
-      <div class="s-metrics" style="margin-top:60px">
-        <div class="s-metric"><span>올해 활동</span><b>${SEED.activities.length}</b></div>
-        <div class="s-metric"><span>대회 · 연계사업</span><b>${Math.max(ext, SEED.activities.filter((a) => ['외부대회', '연계사업'].includes(a.category)).length)}</b></div>
-        <div class="s-metric"><span>부서</span><b>3</b></div>
+      <div style="margin:auto 0;display:grid;grid-template-columns:auto 1fr;gap:70px;align-items:center">
+        ${logo(330)}
+        <div><div class="s-kicker" style="color:#1F6B2C">${esc(C.school)}</div>
+        <h1 class="s-title" style="font-size:150px;margin-top:14px">날샘</h1>
+        <div class="s-sub" style="color:#17502A">${esc(C.identity)}</div></div>
       </div>${foot}</section>`);
-    const list = SEED.activities.map((a) => a.title);
-    S.push(`<section class="slide"><div class="s-kicker"><span class="n">3</span>한 해 동안 뻗어 나간 줄기</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px 50px;margin-top:50px">${list.map((t, i) => `<div style="display:flex;gap:18px;align-items:baseline;font-size:32px;font-weight:700;letter-spacing:-.03em;border-bottom:2px dashed #CDEB9B;padding-bottom:10px"><span style="font-family:var(--serif);font-style:italic;color:#86C93F;font-size:30px">${String(i + 1).padStart(2, '0')}</span>${esc(t)}</div>`).join('')}</div>${foot}</section>`);
-    if (feat) {
-      S.push(`<section class="slide lime"><div class="s-kicker" style="color:#1F6B2C"><span class="n">4</span>대표 기록</div>
-        <h2 class="s-h">${esc(feat.subtitle || feat.title)}</h2><div class="s-body" style="color:#17502A;max-width:1200px">${esc(feat.tagline || feat.summary)}</div>
-        <div class="s-chips">${(feat.keywords || []).slice(0, 5).map((k) => `<span>#${esc(k)}</span>`).join('')}</div>${foot}</section>`);
-    }
-    S.push(`<section class="slide dark"><span class="s-blob"></span><div class="s-kicker"><span class="n">${feat ? 5 : 4}</span>기록은 각자, 숲은 함께</div>
-      <div class="s-flow" style="margin-top:50px">
-        <div><em>01</em><b>학교 메일로 로그인</b><p>비밀번호 없이 메일 링크로</p></div>
-        <div><em>02</em><b>내 기록 · 개인 보고서</b><p>학번 · 진로 · 개인 보고서는 나만 보기</p></div>
-        <div><em>03</em><b>팀 보고서 남기기</b><p>공개 범위는 작성자가 직접</p></div>
+    // 2. 정체성
+    S.push(`<section class="slide"><div class="s-kicker"><span class="n">1</span>NALSSAM</div>
+      <h2 class="s-h" style="font-size:96px;margin-top:80px">대신고 유일무이<br><span style="color:#5FB236">자연과학 · 공학</span> 융합 동아리</h2>
+      <div class="s-body">날샘은 원래 공학 동아리에서 시작해, 지금은 생명부 · 화학부와 함께 자라고 있어요.</div>${foot}</section>`);
+    // 3. 세 부서
+    S.push(`<section class="slide"><div class="s-kicker"><span class="n">2</span>세 갈래의 뿌리</div>
+      <h2 class="s-h">공학 · 생명 · 화학</h2>
+      <div class="s-flow">${C.departments.map((d, i) => `<div><em>0${i + 1}</em><b>${esc(d.key)}</b><p>${esc(d.desc)}</p></div>`).join('')}</div>${foot}</section>`);
+    // 4. 날샘이 최고인 이유
+    S.push(`<section class="slide dark"><span class="s-blob"></span><div class="s-kicker"><span class="n">3</span>날샘이 특별한 이유</div>
+      <div class="s-metrics" style="grid-template-columns:repeat(2,1fr);margin-top:44px">
+        ${(C.highlights || []).map((h) => `<div class="s-metric"><span>${h.icon} ${esc(h.title)}</span><b style="font-size:44px">${esc(h.big || h.title)}</b><p style="font-size:21px;color:#3F5A44;margin:10px 0 0;line-height:1.45">${esc(h.desc)}</p></div>`).join('')}
       </div>${foot}</section>`);
-    S.push(`<section class="slide lime"><span class="s-blob"></span><div style="margin:auto 0"><div class="s-big" style="font-size:200px">함께 자라요.</div><div class="s-sub" style="color:#17502A">날샘 아카이브</div></div>${foot}</section>`);
+    // 5. 공학부 활동
+    S.push(`<section class="slide lime"><div class="s-kicker" style="color:#1F6B2C"><span class="n">4</span>날샘은 원래 공학 동아리였어요</div>
+      <h2 class="s-h">공학부가 준비한 활동들</h2>
+      <div class="s-flow">
+        <div><em>01</em><b>아두이노 스마트팜</b><p>교육 · 제작 · 활용 활동</p></div>
+        <div><em>02</em><b>라즈베리파이 자동화</b><p>자동화 스마트팜 구축과 연계 활동</p></div>
+        <div><em>03</em><b>이론 기반 탐구</b><p>선배들의 노하우가 담긴 꼼꼼한 탐구</p></div>
+        <div><em>04</em><b>대회 실전 경험</b><p>선배들과 함께 다양한 대회에 참여</p></div>
+      </div>${foot}</section>`);
+    // 6. 결과로 보여줌
+    const yearGroups = (C.awards || []).filter((g) => /^\d{4}$/.test(g.year));
+    S.push(`<section class="slide"><div class="s-kicker"><span class="n">5</span>우린 결과로 보여줘요</div>
+      <div style="display:grid;grid-template-columns:repeat(${yearGroups.length},1fr);gap:28px;margin-top:40px">
+        ${yearGroups.map((g) => `<div style="background:#fff;border:2px solid #E3F3C8;border-radius:28px;padding:30px">
+          <div style="font-family:var(--serif);font-style:italic;font-size:64px;color:#1F6B2C;line-height:1">${esc(g.year)}</div>
+          <ul style="margin:18px 0 0;padding-left:22px;font-size:21px;line-height:1.55;color:#3F5A44">${g.items.map((it) => `<li>${esc(it)}</li>`).join('')}</ul></div>`).join('')}
+      </div>${foot}</section>`);
+    // 7. 지원
+    S.push(`<section class="slide dark"><span class="s-blob"></span>
+      <div style="margin:auto 0"><div class="s-kicker">어떤 활동이든, 무엇을 원하든</div>
+      <div class="s-big" style="font-size:190px;color:#CDEB9B;margin-top:20px">지원 가능.</div>
+      <div class="s-sub">자연과학이면 어느 진로든 함께 준비해요</div></div>${foot}</section>`);
+    // 8. 마무리
+    S.push(`<section class="slide lime"><span class="s-blob"></span>
+      <div style="margin:auto;text-align:center;display:grid;justify-items:center;gap:30px">
+        ${logo(300)}
+        <div class="s-title" style="font-size:96px;margin:0">${esc(C.slogan)}</div>
+      </div>${foot}</section>`);
     return S;
   }
 
@@ -1872,6 +1884,8 @@ ${a.links.length ? `\n{\\small\\sffamily\\bfseries\\color{forest}첨부 자료}\
       e.currentTarget.setAttribute('aria-expanded', String(open));
     });
     bindDeck();
+    const brandLogo = $('#brandLogo');
+    if (brandLogo && window.nalssamLogo) brandLogo.innerHTML = window.nalssamLogo('flat');
     // 메일 로그인 링크는 #access_token=… 으로 돌아옴 → supabase-js가 세션으로 바꾼 뒤 라우터 주소로 정리
     const landing = location.hash;
     await Store.init();
