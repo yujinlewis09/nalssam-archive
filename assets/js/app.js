@@ -234,8 +234,11 @@
     $('#authBtn').addEventListener('click', async () => {
       if (Store.user) { await Store.sb.auth.signOut(); toast('로그아웃했어요'); return; }
       modal.showModal();
-      $('#authGoogle').focus();
+      $('#authEmail').focus();
     });
+    // 구글 로그인은 config.js 의 GOOGLE_LOGIN: true 일 때만 노출 (Google Cloud OAuth 설정 필요)
+    $('#authGoogle').hidden = !CFG.GOOGLE_LOGIN;
+    $('#authEmail').addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); $('#authSend').click(); } });
     // 학교 구글 계정 로그인 (메일 발송 없음 → 발송 한도와 무관)
     $('#authGoogle').addEventListener('click', async () => {
       const { error } = await Store.sb.auth.signInWithOAuth({
@@ -252,8 +255,16 @@
       const dom = CFG.WRITER_EMAIL_DOMAIN;
       if (!email) return;
       if (dom && !email.toLowerCase().endsWith('@' + dom)) { toast(`@${dom} 학교 메일만 쓸 수 있어요`); return; }
+      const btn = $('#authSend');
+      btn.disabled = true;
       const { error } = await Store.sb.auth.signInWithOtp({ email, options: { emailRedirectTo: location.origin + location.pathname } });
-      if (error) { toast('전송 실패: ' + error.message); return; }
+      btn.disabled = false;
+      if (error) {
+        const msg = /rate limit/i.test(error.message) ? '메일 발송 한도를 넘었어요. 잠시 후 다시 시도해 주세요 (관리자: Supabase SMTP 설정 필요)'
+          : /not authorized|email_address_not_authorized/i.test(error.message) ? '아직 메일 서버가 설정되지 않았어요 (관리자: Supabase SMTP 설정 필요)'
+            : '전송 실패: ' + error.message;
+        toast(msg); return;
+      }
       modal.close();
       toast('메일함에서 로그인 링크를 눌러주세요 📬');
     });

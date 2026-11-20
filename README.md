@@ -38,17 +38,21 @@ python -m http.server 5517 --directory .
 2. `config.js`에 Project URL과 **Publishable key**(`sb_publishable_…`)를 넣습니다. secret key는 절대 넣지 마세요.
 3. **Authentication → URL Configuration**: Site URL과 Redirect URLs에 배포 주소(`https://<계정>.github.io/<저장소>/`)와 `http://localhost:5517`을 추가.
 
-### 학교 구글 계정 로그인 설정 (권장)
+### 로그인 메일 보내기: Gmail SMTP 연결 (무료)
 
-Supabase 기본 메일 서비스는 프로젝트 팀원 메일로만, 시간당 몇 통만 보낼 수 있어서 부원 전체가 메일 로그인을 쓸 수 없습니다. 대신 Google 로그인을 켭니다.
+로그인은 "학교 메일(@dshs.kr)로 로그인 링크 받기" 방식입니다. Supabase 기본 메일 서비스는 **프로젝트 팀원 메일로만, 시간당 몇 통만** 보내므로, 무료 Gmail 계정을 발신 서버로 연결해야 부원 누구나 받을 수 있습니다 (Gmail 하루 약 500통).
 
-1. https://console.cloud.google.com → 새 프로젝트 → **API 및 서비스 → OAuth 동의 화면**: 사용자 유형 *외부*, 앱 이름 `날샘 아카이브`, 범위는 기본(email · profile · openid)만 → **앱 게시**.
-2. **사용자 인증 정보 → OAuth 클라이언트 ID 만들기** → 유형 *웹 애플리케이션*
-   - 승인된 리디렉션 URI: `https://<프로젝트ref>.supabase.co/auth/v1/callback`
-3. 발급된 클라이언트 ID · 보안 비밀을 Supabase **Authentication → Sign In / Providers → Google**에 넣고 Enable.
-4. 사이트의 로그인 → "Google 학교 계정으로 계속하기". 쓰기 권한은 DB 정책이 `@dshs.kr` 계정에만 줍니다.
+1. 발신용 Gmail 계정 준비 (동아리 공용 계정 권장) → [Google 계정 → 보안](https://myaccount.google.com/security)에서 **2단계 인증** 켜기.
+2. [앱 비밀번호](https://myaccount.google.com/apppasswords) 만들기 → 앱 이름 `nalssam` → 16자리 비밀번호 복사. (결제 · Google Cloud 필요 없음)
+3. Supabase **Authentication → Emails → SMTP Settings → Enable custom SMTP**
+   - Sender email: 그 Gmail 주소 · Sender name: `날샘 NALSSAM`
+   - Host `smtp.gmail.com` · Port `465` · Username: 그 Gmail 주소 · Password: 2번의 앱 비밀번호
+4. **Authentication → Rate Limits**에서 이메일 발송 한도를 필요한 만큼(예: 시간당 60) 올리기.
+5. (선택) **Authentication → Emails → Templates → Magic Link** 제목을 `날샘 아카이브 로그인 링크`로 바꾸기.
 
-> 학교 구글 워크스페이스 관리자가 외부 앱을 막아둔 경우 로그인이 거부될 수 있습니다. 그때는 정보부 선생님께 앱 허용을 요청하세요.
+> 앱 비밀번호는 Supabase 대시보드에만 넣고, 코드 · 채팅 · 저장소에는 절대 적지 마세요.
+>
+> Google Cloud OAuth를 따로 설정했다면 `config.js`의 `GOOGLE_LOGIN: true`로 "Google 학교 계정으로 계속하기" 버튼을 켤 수 있습니다 (선택).
 
 ## 3. GitHub Pages
 

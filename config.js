@@ -14,4 +14,6 @@ window.NAELSAEM_CONFIG = {
   SUPABASE_ANON_KEY: 'sb_publishable_jZ5wG3NNalUte301MpkEFw_HWyfTBWS',
   // 기록을 추가·수정할 수 있는 이메일 도메인 (schema.sql 의 RLS 정책과 같게 맞추세요)
   WRITER_EMAIL_DOMAIN: 'dshs.kr',
+  // 로그인: 기본은 학교 메일 링크(Gmail SMTP 연결 필요). Google Cloud OAuth를 설정했다면 true
+  GOOGLE_LOGIN: false,
 };

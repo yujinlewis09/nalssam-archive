@@ -1036,6 +1036,7 @@ table.t tfoot td { font-weight: 800; border-bottom: 0; color: var(--forest-700);
 .btn-google { width: 100%; background: var(--card); border: 1px solid var(--line-2); color: var(--ink); padding: 13px 18px; font-weight: 700; }
 .btn-google svg { width: 20px; height: 20px; }
 .btn-google:hover { border-color: var(--leaf-400); box-shadow: var(--shadow-sm); }
+.modal-note { font-size: 12.5px; margin-top: -4px !important; }
 .modal-more summary { cursor: pointer; font-size: 13px; color: var(--ink-3); font-weight: 650; }
 .modal-more[open] { display: grid; gap: 8px; }
 .modal-more .muted { font-size: 12.5px; }
