@@ -1,0 +1,348 @@
+% =====================================================================
+%  날샘 NALSSAM 연구·활동 보고서 양식 v2 (LaTeX / Overleaf)
+%  - Overleaf: New Project > Upload Project 로 이 파일을 올린 뒤
+%              Menu > Compiler 를 XeLaTeX 로 바꾸고 Recompile
+%  - 회색 \guide{...} 는 작성 안내, [ ... ] 는 채울 칸입니다. 제출 전 모두 지우세요.
+%  - 구성: Overleaf 실험 보고서 + 연구 논문 + 기술 보고서 양식을 섞고,
+%          동아리 활동 관리 기록(일정·역할·의사결정·예산)을 더했습니다.
+% =====================================================================
+\documentclass[11pt,a4paper]{article}
+\usepackage{kotex}
+\setmainhangulfont{Noto Serif CJK KR}
+\setsanshangulfont{Noto Sans CJK KR}
+\setmainfont{Noto Serif CJK KR}
+\setsansfont{Noto Sans CJK KR}
+% (로컬 TeX에 Noto CJK가 없으면 UnBatang / UnDotum 으로 바꾸세요)
+
+\usepackage[a4paper,top=22mm,bottom=20mm,left=25mm,right=25mm]{geometry}
+\usepackage{xcolor}
+\usepackage{tabularx,booktabs,array,colortbl,makecell}
+\usepackage{titlesec,titletoc}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{amsmath,siunitx}
+\usepackage[most]{tcolorbox}
+\usepackage[hidelinks]{hyperref}
+
+% ---------------- 색 · 공통 명령 ----------------
+\definecolor{forest}{HTML}{1F6B2C}
+\definecolor{leaf}{HTML}{5FB236}
+\definecolor{lime}{HTML}{CDEB9B}
+\definecolor{paleleaf}{HTML}{F2F9E6}
+\definecolor{head}{HTML}{E3F3C8}
+\definecolor{ink}{HTML}{12331A}
+\definecolor{mute}{HTML}{7C937E}
+\definecolor{ph}{HTML}{9AAE9C}
+
+\newcommand{\guide}[1]{\par{\small\color{leaf}\sffamily\bfseries 작성 안내\quad}{\small\color{mute}\itshape #1}\par\smallskip}
+\newcommand{\ph}[1]{{\color{ph}[\,#1\,]}}
+\newcommand{\tcell}[1]{\sffamily\bfseries\color{forest}#1}
+
+\captionsetup{font={small,color=mute},labelfont={bf,color=forest},labelsep=period}
+\renewcommand{\figurename}{그림}
+\renewcommand{\tablename}{표}
+\renewcommand{\contentsname}{목차}
+\renewcommand{\arraystretch}{1.4}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt}
+\setlist[itemize]{leftmargin=1.3em,itemsep=2pt,label={\color{leaf}\textbullet}}
+\setlist[enumerate]{leftmargin=1.6em,itemsep=2pt,label={\color{forest}\sffamily\bfseries\arabic*)}}
+
+\titleformat{\section}{\sffamily\Large\bfseries\color{ink}}{\thesection.}{0.5em}{}[{\color{lime}\titlerule[1pt]}]
+\titleformat{\subsection}{\sffamily\large\bfseries\color{forest}}{\thesubsection}{0.6em}{}
+\titlespacing*{\section}{0pt}{18pt}{8pt}
+\titlespacing*{\subsection}{0pt}{12pt}{4pt}
+
+\pagestyle{fancy}\fancyhf{}
+\renewcommand{\headrulewidth}{0.4pt}\renewcommand{\headrule}{{\color{lime}\hrule width\headwidth height\headrulewidth}}
+\fancyhead[L]{\sffamily\footnotesize\color{mute}날샘 NALSSAM \,·\, 연구·활동 보고서}
+\fancyhead[R]{\sffamily\footnotesize\color{mute}[보고서 제목]}
+\fancyfoot[C]{\sffamily\footnotesize\color{mute}--- \thepage\ ---}
+
+\newtcolorbox{nbox}[1]{colback=paleleaf,colframe=forest,boxrule=0.8pt,arc=2pt,left=8pt,right=8pt,top=6pt,bottom=6pt,
+  fonttitle=\sffamily\bfseries\color{forest},coltitle=forest,colbacktitle=paleleaf,title={#1},attach title to upper,after title={\par}}
+
+\begin{document}
+
+% =====================================================================
+%  표지
+% =====================================================================
+\begin{titlepage}
+\thispagestyle{empty}
+\noindent{\color{leaf}\rule{\linewidth}{5pt}}\\[-4pt]
+{\color{lime}\rule{\linewidth}{2pt}}
+\vspace{18mm}
+
+{\sffamily\bfseries\color{leaf} NALSSAM \;RESEARCH \& ACTIVITY REPORT}\\[2mm]
+{\sffamily\Large\bfseries\color{forest} 날샘 연구·활동 보고서}
+
+\vspace{16mm}
+{\sffamily\fontsize{24}{32}\selectfont\bfseries\color{ink} \ph{보고서 제목: 무엇을 어떻게 했는지 드러나게}}\\[4mm]
+{\sffamily\Large\color{forest} \ph{부제: 결과물 이름 또는 핵심 질문}}
+
+\vspace{6mm}
+{\color{forest}\rule{\linewidth}{1.2pt}}
+\vspace{6mm}
+
+\begin{tabularx}{\linewidth}{>{\columncolor{paleleaf}\tcell}p{34mm} X}
+\toprule
+분류 & \ph{외부 대회 / 대학 연계 / 교내 활동 / 탐방 / 심화 탐구} \\
+대회·프로그램명 & \ph{예: 2026 START-UPCYCLING THON} \\
+주최·주관 & \ph{주최 기관 / 주관 기관 / 협력 학교} \\
+활동 기간 & \ph{2026.\,00.\,00. $\sim$ 2026.\,00.\,00.} \\
+팀명 & \ph{팀 이름} \\
+지도교사 & \ph{성명} \\
+제출일 & \ph{2026.\,00.\,00.} \\
+\bottomrule
+\end{tabularx}
+
+\vspace{5mm}
+{\sffamily\bfseries\color{forest} 구성원}\\[1mm]
+\begin{tabularx}{\linewidth}{p{22mm} p{24mm} p{34mm} X}
+\toprule
+\rowcolor{head}\tcell{학번} & \tcell{이름} & \tcell{역할} & \tcell{주요 담당} \\
+\midrule
+\ph{00000} & \ph{이름} & \ph{팀장 · 총괄} & \ph{실험 설계, 발표} \\
+\ph{00000} & \ph{이름} & \ph{역할} & \ph{담당} \\
+\ph{00000} & \ph{이름} & \ph{역할} & \ph{담당} \\
+\bottomrule
+\end{tabularx}
+
+\vfill
+\begin{flushright}
+{\sffamily\small\color{mute} 대전대신고등학교 환경·생태 동아리}\\[1mm]
+{\sffamily\LARGE\bfseries\color{forest} 날샘 NALSSAM}
+\end{flushright}
+\end{titlepage}
+
+% =====================================================================
+%  요약 · 목차
+% =====================================================================
+\section*{요약}
+\addcontentsline{toc}{section}{요약}
+\guide{보고서 전체를 300\textasciitilde500자로. 「배경(왜) → 목적·가설 → 방법(어떻게) → 핵심 결과(숫자) → 결론·의의」 순서로 한 문단에 씁니다. 본문을 다 쓴 뒤 마지막에 작성하세요.}
+\begin{nbox}{국문 요약}
+\ph{본 연구(활동)는 … 문제를 해결하기 위해 … 을/를 목표로 하였다. … 방법으로 … 을/를 측정한 결과, … 이/가 … \% 감소하였다. 이를 통해 … 을/를 확인하였으며, … 에 활용할 수 있다.}
+\end{nbox}
+{\sffamily\bfseries\color{forest}주제어}\quad \ph{키워드1 · 키워드2 · 키워드3 · 키워드4}
+\guide{(선택) 대회·논문 제출용이라면 영문 Abstract와 Keywords를 같은 내용으로 덧붙입니다.}
+
+\tableofcontents
+\clearpage
+
+% =====================================================================
+\section{서론}
+\subsection{연구(활동) 배경 및 필요성}
+\guide{문제를 보여주는 근거를 제시합니다. 통계·현장 조사·뉴스는 반드시 출처와 연도를 함께 적고, 그 문제가 왜 지금·우리에게 중요한지 연결하세요.}
+\begin{itemize}
+  \item \ph{현황: 국내 연간 발생량 ○○만 t (출처, 연도)}
+  \item \ph{문제점: 대부분 소각·매립되어 ○○ kg CO\textsubscript{2} 배출}
+  \item \ph{현장 조사: 학교 주변 ○곳 조사 결과 …}
+\end{itemize}
+
+\subsection{연구 목적 및 탐구 질문}
+\guide{목적은 측정 가능한 문장으로, 가설은 「\textasciitilde 하면 \textasciitilde 할 것이다」 형태로 씁니다.}
+\begin{tabularx}{\linewidth}{>{\columncolor{paleleaf}\tcell}p{28mm} X}
+\toprule
+연구 목적 & \ph{폐자원 ○○를 이용해 ○○ 성능을 가진 ○○를 만든다} \\
+탐구 질문 & \ph{○○를 바꾸면 ○○는 어떻게 달라지는가?} \\
+가설 & \ph{○○의 비율이 높을수록 ○○가 낮아질 것이다} \\
+\bottomrule
+\end{tabularx}
+
+\subsection{선행 연구·사례 조사}
+\guide{비슷한 연구·제품·사례를 2\textasciitilde4개 찾아 「무엇을 했고 → 한계가 무엇이며 → 우리는 무엇이 다른지」를 정리합니다.}
+\begin{tabularx}{\linewidth}{p{38mm} X X}
+\toprule
+\rowcolor{head}\tcell{선행 연구·사례} & \tcell{핵심 내용} & \tcell{한계 / 우리 연구와의 차이} \\
+\midrule
+\ph{저자(연도) 또는 제품명} & \ph{요약} & \ph{차별점} \\
+\ph{ } & \ph{ } & \ph{ } \\
+\bottomrule
+\end{tabularx}
+
+% =====================================================================
+\section{이론적 배경}
+\subsection{핵심 개념}
+\guide{보고서를 이해하는 데 꼭 필요한 개념만 정의합니다. 교과 개념(화학 반응, 열전달, 생태계 순환 등)과 연결하면 세특에 유리합니다.}
+\ph{개념 1: 정의와 이 연구에서의 의미}
+
+\ph{개념 2: 원리를 그림이나 식으로 설명} \quad 예) \(Q = mc\Delta T\)
+
+\subsection{관련 원리 정리}
+\begin{tabularx}{\linewidth}{p{34mm} X X}
+\toprule
+\rowcolor{head}\tcell{원리·이론} & \tcell{설명} & \tcell{본 연구에서의 적용} \\
+\midrule
+\ph{예: 탄화층 형성} & \ph{리그닌이 타면서 숯이 되어 열을 차단} & \ph{커피박의 리그닌 함량 활용} \\
+\bottomrule
+\end{tabularx}
+
+% =====================================================================
+\section{연구 방법}
+\subsection{연구 설계 개요}
+\guide{전체 흐름을 한눈에 보이게 단계도로 그립니다.}
+\begin{nbox}{연구 흐름도}
+\centering \ph{① 수집 → ② 전처리 → ③ 제작 → ④ 시험·측정 → ⑤ 분석·개선}
+\end{nbox}
+
+\subsection{재료 및 장치}
+\begin{tabularx}{\linewidth}{p{40mm} p{32mm} X r}
+\toprule
+\rowcolor{head}\tcell{품목} & \tcell{규격} & \tcell{용도} & \tcell{수량} \\
+\midrule
+\ph{예: ESP32 개발보드} & \ph{DevKitC V4} & \ph{온도 데이터 수집} & \ph{1} \\
+\ph{ } & \ph{ } & \ph{ } & \ph{ } \\
+\bottomrule
+\end{tabularx}
+
+\subsection{변인 설정}
+\guide{실험이 있는 연구라면 반드시 채웁니다. 대조군(비교 기준)을 명확히 하세요.}
+\begin{tabularx}{\linewidth}{>{\columncolor{paleleaf}\tcell}p{24mm} p{44mm} X}
+\toprule
+독립 변인 & \ph{바꾼 조건} & \ph{예: 배합비 0\%, 25\%, 50\%} \\
+종속 변인 & \ph{측정한 결과} & \ph{예: 60초 후 뒷면 온도(\si{\celsius})} \\
+통제 변인 & \ph{같게 유지한 조건} & \ph{예: 시편 두께 10 mm, 가열 거리 5 cm} \\
+대조군 & \ph{비교 기준} & \ph{예: 기존 재료로 만든 시편} \\
+\bottomrule
+\end{tabularx}
+
+\subsection{실험(활동) 절차}
+\begin{enumerate}
+  \item \ph{시료 준비: …}
+  \item \ph{제작: …}
+  \item \ph{측정: … (반복 횟수 \(n \geq 3\))}
+  \item \ph{기록: …}
+\end{enumerate}
+
+\subsection{데이터 수집·분석 방법}
+\ph{측정 도구와 간격(예: 0.25초), 기록 방법, 사용한 분석 방법(평균·표준편차·그래프 비교 등)}
+
+\subsection{안전 및 윤리 고려}
+\guide{가열·화학약품·전기·생물 시료를 다루면 반드시 씁니다. 지도교사 입회 여부, 보호구, 폐기 방법을 적으세요.}
+\begin{itemize}\item \ph{보호안경·장갑 착용, 소화기 비치, 환기되는 공간에서 실시}\end{itemize}
+
+% =====================================================================
+\section{결과}
+\subsection{결과 요약}
+\guide{가장 중요한 숫자를 먼저 보여줍니다. 해석은 5장에서 하고, 여기서는 사실만 씁니다.}
+\begin{table}[h]\centering
+\caption{\ph{조건별 측정 결과 — 단위 표기}}
+\begin{tabular}{l c c c c}
+\toprule
+\rowcolor{head}\tcell{조건} & \tcell{측정값 1} & \tcell{측정값 2} & \tcell{측정값 3} & \tcell{평균 (± 표준편차)} \\
+\midrule
+\ph{대조군} & \ph{ } & \ph{ } & \ph{ } & \ph{ } \\
+\ph{실험군 A} & \ph{ } & \ph{ } & \ph{ } & \ph{ } \\
+\ph{실험군 B} & \ph{ } & \ph{ } & \ph{ } & \ph{ } \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{세부 결과}
+\guide{그래프·사진은 「그림 번호. 설명」 캡션을 아래에 답니다. 축 이름과 단위를 꼭 적으세요.}
+\begin{figure}[h]\centering
+\fbox{\parbox[c][40mm][c]{0.8\linewidth}{\centering\color{ph} 그래프 또는 사진 \\ \texttt{\textbackslash includegraphics[width=0.8\textbackslash linewidth]\{파일명\}}}}
+\caption{\ph{시간에 따른 뒷면 온도 변화 (\si{\celsius})}}
+\end{figure}
+
+% =====================================================================
+\section{고찰}
+\subsection{결과 해석 및 가설 검증}
+\guide{가설이 맞았는지/틀렸는지를 결과 숫자로 판단하고, 그 이유를 2장 이론과 연결해 설명합니다.}
+\ph{가설은 (지지되었다 / 부분적으로 지지되었다 / 기각되었다). 그 이유는 …}
+\subsection{오차 원인 및 한계}
+\begin{itemize}\item \ph{측정 오차: …}\item \ph{시료·환경 한계: …}\end{itemize}
+\subsection{개선 방향}
+\ph{다음에 다시 한다면 무엇을 바꿀지 구체적으로}
+
+% =====================================================================
+\section{결론 및 제언}
+\subsection{결론}
+\guide{요약과 비슷하지만, 「알게 된 사실」과 「의의」에 집중해 3\textasciitilde5문장으로 씁니다.}
+\ph{본 연구를 통해 … 을/를 확인하였다. …}
+\subsection{후속 연구·활동 제언}
+\begin{itemize}\item \ph{후속 탐구 계획, 교과 수업·다른 대회와의 연계}\end{itemize}
+
+% =====================================================================
+\section{활동 관리 기록}
+\guide{대회·프로그램 보고서와 생활기록부 근거 자료로 쓰이는 부분입니다. 실제 진행한 대로 기록하세요.}
+\subsection{일정표}
+\begin{tabularx}{\linewidth}{p{30mm} p{30mm} X p{26mm}}
+\toprule
+\rowcolor{head}\tcell{단계} & \tcell{기간} & \tcell{주요 내용} & \tcell{산출물} \\
+\midrule
+\ph{1. 주제 선정} & \ph{00.00 $\sim$ 00.00} & \ph{ } & \ph{기획서} \\
+\ph{2. 실험·제작} & \ph{ } & \ph{ } & \ph{시제품} \\
+\ph{3. 발표·제출} & \ph{ } & \ph{ } & \ph{포스터·보고서} \\
+\bottomrule
+\end{tabularx}
+
+\subsection{역할 분담 및 기여도}
+\begin{tabularx}{\linewidth}{p{24mm} p{28mm} X r}
+\toprule
+\rowcolor{head}\tcell{이름} & \tcell{역할} & \tcell{구체적 기여 내용} & \tcell{기여도(\%)} \\
+\midrule
+\ph{이름} & \ph{역할} & \ph{실제로 한 일} & \ph{25} \\
+\bottomrule
+\end{tabularx}
+
+\subsection{의사결정 기록}
+\guide{아이디어나 방법을 바꾼 순간을 기록합니다. 발표·면접에서 가장 설득력 있는 부분이 됩니다.}
+\begin{tabularx}{\linewidth}{p{18mm} p{34mm} p{34mm} X}
+\toprule
+\rowcolor{head}\tcell{날짜} & \tcell{이전 안} & \tcell{바뀐 안} & \tcell{바꾼 이유(근거)} \\
+\midrule
+\ph{00.00} & \ph{ } & \ph{ } & \ph{ } \\
+\bottomrule
+\end{tabularx}
+
+\subsection{예산 집행 내역}
+\begin{tabularx}{\linewidth}{p{34mm} X r r r}
+\toprule
+\rowcolor{head}\tcell{품목} & \tcell{구입 목적} & \tcell{단가(원)} & \tcell{수량} & \tcell{합계(원)} \\
+\midrule
+\ph{ } & \ph{ } & \ph{ } & \ph{ } & \ph{ } \\
+\midrule
+\multicolumn{4}{r}{\tcell{소계}} & \ph{ } \\
+\bottomrule
+\end{tabularx}
+
+% =====================================================================
+\section*{참고문헌}
+\addcontentsline{toc}{section}{참고문헌}
+\guide{APA 7판 형식을 권장합니다. 본문에서 인용한 순서 또는 저자 가나다순으로 정리하세요.}
+\begin{enumerate}[label={[\arabic*]}]
+  \item \ph{저자. (연도). 제목. \textit{학술지명}, 권(호), 쪽. https://doi.org/…}
+  \item \ph{기관명. (연도). \textit{보고서 제목}. URL}
+  \item \ph{언론사. (연도, 월 일). 기사 제목. URL}
+\end{enumerate}
+
+\section*{부록}
+\addcontentsline{toc}{section}{부록}
+\guide{원자료(측정값 전체), 학습지·기획서, 코드, 추가 사진, 회의록 등을 첨부합니다.}
+\begin{tabularx}{\linewidth}{p{18mm} X p{30mm} X}
+\toprule
+\rowcolor{head}\tcell{번호} & \tcell{자료명} & \tcell{형태} & \tcell{링크·위치} \\
+\midrule
+부록 A & \ph{원자료} & \ph{스프레드시트} & \ph{ } \\
+부록 B & \ph{학습지·기획서} & \ph{PDF / 캔바} & \ph{ } \\
+부록 C & \ph{코드} & \ph{.ino / .py} & \ph{ } \\
+\bottomrule
+\end{tabularx}
+
+\section*{제출 전 점검표}
+\begin{itemize}[label={\color{forest}$\square$}]
+  \item 요약에 핵심 결과 숫자가 들어갔다
+  \item 모든 통계·자료에 출처와 연도를 적었다
+  \item 표·그림에 번호와 캡션, 단위를 달았다
+  \item 변인(독립·종속·통제)과 대조군을 밝혔다
+  \item 가설 검증 결과를 결과 숫자로 판단했다
+  \item 오차·한계와 개선 방향을 적었다
+  \item 구성원별 역할과 기여 내용을 구체적으로 적었다
+  \item 회색 「작성 안내」 문구와 \ph{ } 표시를 모두 지웠다
+\end{itemize}
+
+\end{document}
