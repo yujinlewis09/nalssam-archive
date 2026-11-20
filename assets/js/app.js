@@ -76,7 +76,7 @@
         try {
           await loadScript('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js');
           this.sb = window.supabase.createClient(CFG.SUPABASE_URL, CFG.SUPABASE_ANON_KEY);
-          const { data } = await this.sb.auth.getSession();
+          const { data } = await Promise.race([this.sb.auth.getSession(), new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 6000))]);
           this.user = data.session?.user || null;
           this.sb.auth.onAuthStateChange((event, session) => {
             const before = this.user?.id;
@@ -88,12 +88,15 @@
               this.loadRemote().then(render).catch((e) => console.warn(e));
             }
           });
-          await this.loadRemote();
+          // DB가 늦게 응답해도 화면이 비지 않도록 8초 제한
+          await Promise.race([this.loadRemote(), new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 8000))]);
           this.mode = 'supabase';
         } catch (err) {
           console.warn('[날샘] Supabase 연결 실패, 로컬 모드로 전환', err);
           this.sb = null;
+          this.offline = true;
           this.loadLocal();
+          setTimeout(() => toast('DB 응답이 늦어서 예시 데이터로 먼저 보여드려요. 잠시 후 새로고침해 주세요'), 600);
         }
       } else {
         this.loadLocal();
@@ -222,7 +225,7 @@
       btn.hidden = false;
       btn.textContent = Store.user ? (Store.user.email || '').split('@')[0] + ' · 로그아웃' : '로그인';
     } else {
-      pill.textContent = '로컬 모드';
+      pill.textContent = Store.offline ? 'DB 연결 지연' : '로컬 모드';
       pill.classList.remove('live');
       pill.title = 'config.js 에 Supabase를 연결하면 모두가 같은 DB를 봅니다';
       btn.hidden = true;
@@ -364,13 +367,13 @@
     const C = SEED.club;
     const locked = Store.mode === 'supabase' && !Store.isMember();
     const openContests = SEED.contests.filter((c) => ['open', 'soon'].includes(contestStatus(c).kind)).length;
-    const awardCount = (C.awards || []).filter((g) => /^\d{4}$/.test(g.year)).reduce((n, g) => n + g.items.length, 0);
+    const awardCount = (C.awards || []).filter((g) => g.year !== '활동').reduce((n, g) => n + g.items.length, 0);
     const kwRow = (C.keywords || []).map((k) => `<span class="chip">${esc(k)}</span>`).join('');
     const chap = (n, title) => `<div class="chapter reveal" aria-hidden="true"><span class="ch-no">${n}</span><span class="ch-line"></span><span class="ch-title">${esc(title)}</span></div>`;
 
     return `
     <nav class="rail" aria-label="챕터 이동">
-      ${[['00', '표지'], ['01', '부서'], ['02', '특별한 이유'], ['03', '결과로 보여줌'], ['04', '함께 쓰기']].map(([n, t]) => `<button type="button" data-rail="ch-${n}" title="${t}"><i></i><span>${n} ${t}</span></button>`).join('')}
+      ${[['00', '표지'], ['01', '부서'], ['02', '특별한 이유'], ['03', '발자취'], ['04', '결과로 보여줌'], ['05', '함께 쓰기']].map(([n, t]) => `<button type="button" data-rail="ch-${n}" title="${t}"><i></i><span>${n} ${t}</span></button>`).join('')}
     </nav>
 
     <section class="hero wrap" id="ch-00" data-chapter>
@@ -385,7 +388,7 @@
           </div>
           <div class="hero-stats reveal">
             <div class="stat"><b>3</b><span>공학 · 생명 · 화학부</span></div>
-            <div class="stat"><b>${awardCount}</b><span>수상 · 선정 (2020–2022)</span></div>
+            <div class="stat"><b>${awardCount}</b><span>수상 · 선정 (2018–2022)</span></div>
             <a class="stat" href="#/contests"><b>${SEED.contests.length}</b><span>대회 정보${openContests ? ` · ${openContests}곳 곧 열림` : ''}</span></a>
           </div>
         </div>
@@ -434,7 +437,29 @@
     </section>
 
     <section class="wrap" id="ch-03" data-chapter>
-      ${chap('03', 'Proven by Results')}
+      ${chap('03', 'Since 2018')}
+      <div class="sec-head">
+        <div><span class="eyebrow reveal"><i></i>날샘의 발자취</span><h2 class="reveal">자율 동아리에서, ${esc(C.motto)}로</h2></div>
+        <p class="reveal">2018년 공학 · 창업 자율 동아리로 시작해, 2022년 다섯 부서를 거쳐 지금의 자연과학 · 공학 융합 동아리가 되었어요.</p>
+      </div>
+      <ol class="history reveal">
+        ${(C.timeline || []).map((t) => `<li><span class="h-when">${esc(t.when)}</span><span class="h-dot" aria-hidden="true"></span><div><b>${esc(t.title)}</b>${t.desc ? `<p>${esc(t.desc)}</p>` : ''}</div></li>`).join('')}
+      </ol>
+
+      <div class="era reveal">
+        <div class="era-head"><span class="era-tag">2022 선배 기수</span><h3>다섯 부서로 운영되던 날샘</h3><p>“선후배가 함께하는 Flexible한 융합공학동아리”</p></div>
+        <div class="era-grid">
+          ${(C.era2022 || []).map((d) => `<div class="era-card"><b>${esc(d.key)}</b><q>${esc(d.quote)}</q><ul>${d.items.map((x) => `<li>${esc(x)}</li>`).join('')}</ul></div>`).join('')}
+        </div>
+      </div>
+
+      <div class="pillars">
+        ${(C.pillars || []).map((p) => `<div class="pillar reveal"><span class="p-ic" aria-hidden="true">${p.icon}</span><div><b>${esc(p.title)}</b><span class="p-sub">${esc(p.sub)}</span><p>${esc(p.desc)}</p></div></div>`).join('')}
+      </div>
+    </section>
+
+    <section class="wrap" id="ch-04" data-chapter>
+      ${chap('04', 'Proven by Results')}
       <div class="sec-head">
         <div><span class="eyebrow reveal"><i></i>우린 결과로 보여줘요</span><h2 class="reveal">선배들이 쌓아온 수상 · 활동</h2></div>
         <a class="btn btn-soft reveal" href="#/contests">대회 아카이브 <span class="arr">→</span></a>
@@ -446,11 +471,11 @@
             <ul>${g.items.map((it) => `<li><span class="ay-dot" aria-hidden="true"></span>${esc(it)}</li>`).join('')}</ul>
           </div>`).join('')}
       </div>
-      <p class="muted source-note reveal">출처: 대전대신고등학교 공식 유튜브 「2026 날샘 동아리 홍보영상」</p>
+      <p class="muted source-note reveal">출처: 대전대신고등학교 공식 유튜브 동아리 홍보영상 ${(C.sources || []).map((s) => `<a class="tag" href="${esc(s.url)}" target="_blank" rel="noopener noreferrer">${esc(s.label)} ↗</a>`).join(' · ')}</p>
     </section>
 
-    <section class="wrap" id="ch-04" data-chapter>
-      ${chap('04', 'Write Together')}
+    <section class="wrap" id="ch-05" data-chapter>
+      ${chap('05', 'Write Together')}
       <div class="join reveal">
         <div>
           <h2>기록은 각자, 숲은 함께.</h2>
@@ -1545,12 +1570,24 @@
         <div><em>04</em><b>대회 실전 경험</b><p>선배들과 함께 다양한 대회에 참여</p></div>
       </div>${foot}</section>`);
     // 6. 결과로 보여줌
-    const yearGroups = (C.awards || []).filter((g) => /^\d{4}$/.test(g.year));
-    S.push(`<section class="slide"><div class="s-kicker"><span class="n">5</span>우린 결과로 보여줘요</div>
-      <div style="display:grid;grid-template-columns:repeat(${yearGroups.length},1fr);gap:28px;margin-top:40px">
-        ${yearGroups.map((g) => `<div style="background:#fff;border:2px solid #E3F3C8;border-radius:28px;padding:30px">
-          <div style="font-family:var(--serif);font-style:italic;font-size:64px;color:#1F6B2C;line-height:1">${esc(g.year)}</div>
-          <ul style="margin:18px 0 0;padding-left:22px;font-size:21px;line-height:1.55;color:#3F5A44">${g.items.map((it) => `<li>${esc(it)}</li>`).join('')}</ul></div>`).join('')}
+    // 5-1. 발자취
+    S.push(`<section class="slide"><div class="s-kicker"><span class="n">5</span>날샘의 발자취 · Since 2018</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:26px 30px;margin-top:46px">
+        ${(C.timeline || []).map((t) => `<div style="border-top:4px solid #AEDD62;padding-top:16px">
+          <div style="font-family:var(--serif);font-style:italic;font-size:40px;color:#1F6B2C;line-height:1">${esc(t.when)}</div>
+          <div style="font-size:24px;font-weight:800;letter-spacing:-.03em;margin-top:12px;line-height:1.3">${esc(t.title)}</div></div>`).join('')}
+      </div>${foot}</section>`);
+    // 5-2. 2022 다섯 부서
+    S.push(`<section class="slide dark"><span class="s-blob"></span><div class="s-kicker">2022 · 다섯 부서로 운영되던 날샘</div>
+      <h2 class="s-h" style="font-size:54px">선후배가 함께하는 Flexible한 융합공학동아리</h2>
+      <div class="s-flow">${(C.era2022 || []).map((d) => `<div><b style="font-size:24px">${esc(d.key)}</b><p>${esc(d.quote)}</p></div>`).join('')}</div>${foot}</section>`);
+    // 6. 결과로 보여줌
+    const yearGroups = (C.awards || []).filter((g) => g.year !== '활동');
+    S.push(`<section class="slide"><div class="s-kicker"><span class="n">6</span>우린 결과로 보여줘요</div>
+      <div style="display:grid;grid-template-columns:repeat(${yearGroups.length},1fr);gap:22px;margin-top:34px">
+        ${yearGroups.map((g) => `<div style="background:#fff;border:2px solid #E3F3C8;border-radius:26px;padding:24px">
+          <div style="font-family:var(--serif);font-style:italic;font-size:48px;color:#1F6B2C;line-height:1">${esc(g.year)}</div>
+          <ul style="margin:16px 0 0;padding-left:20px;font-size:17px;line-height:1.5;color:#3F5A44">${g.items.map((it) => `<li>${esc(it)}</li>`).join('')}</ul></div>`).join('')}
       </div>${foot}</section>`);
     // 7. 지원
     S.push(`<section class="slide dark"><span class="s-blob"></span>
