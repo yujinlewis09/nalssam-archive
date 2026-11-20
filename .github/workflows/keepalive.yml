@@ -1,0 +1,53 @@
+# =========================================================
+# Supabase 무료 프로젝트 일시정지 방지 (keep-alive)
+#  - 무료 플랜은 7일 동안 DB 요청이 거의 없으면 자동 일시정지됩니다.
+#    공식 문서: "하루에 몇 번 DB 요청이 있으면 충분" → 8시간마다 읽기 요청을 보냅니다.
+#  - 공개용 키(config.js 의 Publishable key)로 '읽기'만 합니다. 데이터는 바꾸지 않습니다.
+#  - 요청이 실패하면(프로젝트가 이미 멈춘 경우 등) 이 작업이 실패로 표시되고
+#    GitHub이 저장소 주인에게 알림 메일을 보냅니다 → Supabase 대시보드에서 Resume.
+#  - GitHub은 60일 동안 저장소 활동이 없으면 예약 작업을 멈추므로,
+#    매달 1일 .github/keepalive.log 를 갱신하는 작은 커밋을 남깁니다.
+# =========================================================
+name: Supabase keep-alive
+
+on:
+  schedule:
+    - cron: '17 */8 * * *'   # 8시간마다 (UTC 기준 00:17, 08:17, 16:17)
+    - cron: '30 3 1 * *'     # 매달 1일: 예약 작업이 멈추지 않도록 기록 갱신
+  workflow_dispatch: {}      # Actions 탭에서 직접 실행 가능
+
+permissions:
+  contents: write
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Supabase에 읽기 요청 보내기
+        run: |
+          URL=$(grep -oE "https://[a-z0-9]+\.supabase\.co" config.js | head -n1)
+          KEY=$(grep -oE "sb_publishable_[A-Za-z0-9_-]+" config.js | head -n1)
+          if [ -z "$URL" ] || [ -z "$KEY" ]; then echo "config.js 에서 URL/키를 찾지 못했어요"; exit 1; fi
+          fail=0
+          for t in activities contests; do
+            code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 30 \
+              "$URL/rest/v1/$t?select=id&limit=1" -H "apikey: $KEY")
+            echo "$t -> HTTP $code"
+            [ "$code" = "200" ] || fail=1
+          done
+          if [ "$fail" = "1" ]; then
+            echo "::error::Supabase 응답이 정상이 아니에요. 프로젝트가 일시정지됐는지 대시보드에서 확인하세요."
+            exit 1
+          fi
+
+      - name: 월 1회 기록 갱신 (예약 작업 유지용)
+        if: github.event.schedule == '30 3 1 * *'
+        run: |
+          date -u +"%Y-%m-%dT%H:%M:%SZ keep-alive" >> .github/keepalive.log
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .github/keepalive.log
+          git commit -m "chore: keep-alive $(date -u +%Y-%m)"
+          git push
